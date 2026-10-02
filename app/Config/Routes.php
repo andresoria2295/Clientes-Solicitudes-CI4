@@ -43,3 +43,17 @@ $routes->post(
     'Solicitudes::eliminar/$1',
     ['filter' => 'csrf']
 );
+
+
+/* ==========================================
+   API REST - CLIENTES
+========================================== */
+
+// Obtener todos los clientes.
+$routes->get('api/clientes', 'Api\Clientes::index');
+
+// Obtener un cliente por ID.
+$routes->get('api/clientes/(:num)', 'Api\Clientes::ver/$1');
+
+// Registrar un cliente mediante JSON.
+$routes->post('api/clientes', 'Api\Clientes::guardar');
