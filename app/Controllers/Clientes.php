@@ -3,6 +3,8 @@
 namespace App\Controllers;
 
 use App\Models\ClienteModel;
+use App\Models\SolicitudModel;
+use App\Entities\Cliente;
 
 class Clientes extends BaseController
 {
@@ -66,26 +68,29 @@ class Clientes extends BaseController
             ->with('success', 'Cliente registrado correctamente.');
     }
 
-    public function ver($id)
+    public function ver(int $id)
     {
-        // Instanciamos nuestro modelo.
+        // Instanciamos el modelo.
         $clienteModel = new ClienteModel();
 
-        // Buscamos exclusivamente el registro solicitado.
-        $cliente = $clienteModel->find($id);
+        // Recuperamos el registro como una Entity Cliente.
+        $cliente = $clienteModel
+            ->asObject(Cliente::class)
+            ->find($id);
 
         // Comprobamos si existe.
-        if (!$cliente) {
+        if ($cliente === null) {
             throw \CodeIgniter\Exceptions\PageNotFoundException::forPageNotFound(
                 'El cliente solicitado no existe.'
             );
         }
 
-        // Enviamos el cliente a nuestra vista.
+        // Enviamos la Entity a nuestra vista.
         return view('clientes/ver', [
             'cliente' => $cliente
         ]);
     }
+
 
     public function editar(int $id)
     {
@@ -102,8 +107,8 @@ class Clientes extends BaseController
             );
         }
 
-        helper('form'); 
-        
+        helper('form');
+
         // Enviamos sus datos al formulario de edición.
         return view('clientes/editar', [
             'cliente' => $cliente
@@ -159,13 +164,13 @@ class Clientes extends BaseController
             ->with('success', 'Cliente actualizado correctamente.');
     }
 
-    
     public function eliminar(int $id)
     {
-        // 1. Instanciamos el modelo de clientes.
+        // 1. Instanciamos ambos modelos.
         $clienteModel = new ClienteModel();
+        $solicitudModel = new SolicitudModel();
 
-        // 2. Comprobamos si el cliente existe.
+        // 2. Comprobamos que el cliente exista.
         $cliente = $clienteModel->find($id);
 
         if (!$cliente) {
@@ -174,16 +179,43 @@ class Clientes extends BaseController
             );
         }
 
-        // 3. Eliminamos el registro mediante su ID.
-        $resultado = $clienteModel->delete($id);
+        // 3. Buscamos si tiene alguna solicitud asociada.
+        $solicitudExistente = $solicitudModel
+            ->where('cliente_id', $id)
+            ->first();
 
-        // 4. Comprobamos si la operación se realizó.
+        // 4. Si tiene solicitudes, impedimos la eliminación.
+        if ($solicitudExistente !== null) {
+
+            return redirect()->to(site_url('clientes'))
+                ->with(
+                    'error',
+                    'No se puede eliminar este cliente porque tiene solicitudes asociadas.'
+                );
+        }
+
+        // 5. Si no tiene solicitudes, intentamos eliminarlo.
+        try {
+
+            $resultado = $clienteModel->delete($id);
+
+        } catch (\CodeIgniter\Database\Exceptions\DatabaseException $e) {
+
+            // Registramos el error técnico sin mostrarlo al usuario.
+            log_message('error', 'Error al eliminar cliente: ' . $e->getMessage());
+
+            return redirect()->to(site_url('clientes'))
+                ->with('error', 'No se pudo eliminar el cliente. Verificá sus relaciones.');
+        }
+
+        // 6. Verificamos el resultado.
         if (!$resultado) {
+
             return redirect()->to(site_url('clientes'))
                 ->with('error', 'No se pudo eliminar el cliente.');
         }
 
-        // 5. Regresamos al listado.
+        // 7. Confirmamos la operación.
         return redirect()->to(site_url('clientes'))
             ->with('success', 'Cliente eliminado correctamente.');
     }

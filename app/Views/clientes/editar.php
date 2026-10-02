@@ -1,41 +1,53 @@
 
-<!DOCTYPE html>
-<html lang="es">
+<?= $this->extend('layouts/main') ?>
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<?= $this->section('content') ?>
 
-    <title>Editar cliente</title>
-</head>
+<!-- ENCABEZADO -->
 
-<body>
+<div class="page-header">
 
-    <h1>Editar cliente</h1>
+    <div>
+        <h1>Editar cliente</h1>
 
-    <!-- Mostrar errores de validación -->
-    <?php $errors = session()->getFlashdata('errors') ?? []; ?>
+        <p class="subtitle">
+            Modificando el cliente ID:
+            <strong><?= esc($cliente['id']) ?></strong>
+        </p>
+    </div>
 
-    <?php if (!empty($errors)): ?>
+    <a href="<?= site_url('clientes') ?>" class="btn">
+        Volver al listado
+    </a>
 
-        <div role="alert">
-            <h3>Revisá los siguientes errores:</h3>
+</div>
 
-            <ul>
-                <?php foreach ($errors as $error): ?>
-                    <li><?= esc($error) ?></li>
-                <?php endforeach; ?>
-            </ul>
-        </div>
 
-    <?php endif; ?>
+<!-- ERRORES DE VALIDACIÓN -->
 
-    <p>
-        Estás modificando el cliente ID:
-        <strong><?= esc($cliente['id']) ?></strong>
-    </p>
+<?php $errors = session()->getFlashdata('errors') ?? []; ?>
 
-    <!-- Formulario de edición -->
+<?php if (!empty($errors)): ?>
+
+    <div class="alert alert-error" role="alert">
+
+        <strong>Revisá los siguientes errores:</strong>
+
+        <ul>
+            <?php foreach ($errors as $error): ?>
+                <li><?= esc($error) ?></li>
+            <?php endforeach; ?>
+        </ul>
+
+    </div>
+
+<?php endif; ?>
+
+
+<!-- FORMULARIO DE EDICIÓN -->
+
+<div class="panel">
+
     <form
         action="<?= site_url('clientes/' . $cliente['id'] . '/actualizar') ?>"
         method="POST"
@@ -43,53 +55,92 @@
 
         <?= csrf_field() ?>
 
-        <label>Nombre:</label>
-        <input
-            type="text"
-            name="nombre"
-            value="<?= esc(old('nombre') ?? $cliente['nombre']) ?>"
-            required
-        >
+        <!-- NOMBRE -->
 
-        <br><br>
+        <div class="form-group">
 
-        <label>Apellido:</label>
-        <input
-            type="text"
-            name="apellido"
-            value="<?= esc(old('apellido') ?? $cliente['apellido'] ?? '') ?>"
-        >
+            <label for="nombre">Nombre *</label>
 
-        <br><br>
+            <input
+                type="text"
+                name="nombre"
+                id="nombre"
+                maxlength="100"
+                value="<?= esc(old('nombre') ?? $cliente['nombre']) ?>"
+                required
+            >
 
-        <label>Email:</label>
-        <input
-            type="email"
-            name="email"
-            value="<?= esc(old('email') ?? $cliente['email']) ?>"
-            required
-        >
+        </div>
 
-        <br><br>
 
-        <label>Teléfono:</label>
-        <input
-            type="text"
-            name="telefono"
-            value="<?= esc(old('telefono') ?? $cliente['telefono'] ?? '') ?>"
-        >
+        <!-- APELLIDO -->
 
-        <br><br>
+        <div class="form-group">
 
-        <button type="submit">Guardar cambios</button>
+            <label for="apellido">Apellido</label>
+
+            <input
+                type="text"
+                name="apellido"
+                id="apellido"
+                maxlength="100"
+                value="<?= esc(old('apellido') ?? $cliente['apellido'] ?? '') ?>"
+            >
+
+        </div>
+
+
+        <!-- EMAIL -->
+
+        <div class="form-group">
+
+            <label for="email">Correo electrónico *</label>
+
+            <input
+                type="email"
+                name="email"
+                id="email"
+                maxlength="190"
+                value="<?= esc(old('email') ?? $cliente['email']) ?>"
+                required
+            >
+
+        </div>
+
+
+        <!-- TELÉFONO -->
+
+        <div class="form-group">
+
+            <label for="telefono">Teléfono</label>
+
+            <input
+                type="tel"
+                name="telefono"
+                id="telefono"
+                maxlength="30"
+                value="<?= esc(old('telefono') ?? $cliente['telefono'] ?? '') ?>"
+            >
+
+        </div>
+
+
+        <!-- ACCIONES -->
+
+        <div class="action-group">
+
+            <button type="submit" class="btn btn-primary">
+                Guardar cambios
+            </button>
+
+            <a href="<?= site_url('clientes') ?>" class="btn">
+                Cancelar
+            </a>
+
+        </div>
 
     </form>
 
-    <br>
+</div>
 
-    <a href="<?= site_url('clientes') ?>">
-        Cancelar y volver al listado
-    </a>
-
-</body>
-</html>
+<?= $this->endSection() ?>

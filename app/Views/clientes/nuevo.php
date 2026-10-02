@@ -1,81 +1,141 @@
-<!DOCTYPE html>
-<html lang="es">
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nuevo cliente</title>
-</head>
+<?= $this->extend('layouts/main') ?>
 
-<body>
+<?= $this->section('content') ?>
 
-    <h1>Registrar nuevo cliente</h1>
+<!-- ENCABEZADO -->
 
-    <?php $errors = session()->getFlashdata('errors') ?? []; ?>
+<div class="page-header">
 
-    <?php if (!empty($errors)): ?>
+    <div>
+        <h1>Registrar nuevo cliente</h1>
 
-        <div>
-            <h3>Revisá los siguientes campos:</h3>
+        <p class="subtitle">
+            Completá la información del cliente.
+        </p>
+    </div>
 
-            <ul>
-                <?php foreach ($errors as $error): ?>
-                    <li><?= esc($error) ?></li>
-                <?php endforeach; ?>
-            </ul>
-        </div>
-
-    <?php endif; ?>
-    <form action="<?= site_url('clientes') ?>" method="POST">
-
-        <?= csrf_field() ?>
-
-        <label>Nombre:</label>
-        <input
-            type="text"
-            name="nombre"
-            value="<?= esc(old('nombre') ?? '') ?>"
-            required
-        >
-
-        <br><br>
-
-        <label>Apellido:</label>
-        <input
-            type="text"
-            name="apellido"
-            value="<?= esc(old('apellido') ?? '') ?>"
-        >
-
-        <br><br>
-
-        <label>Email:</label>
-        <input
-            type="email"
-            name="email"
-            value="<?= esc(old('email') ?? '') ?>"
-            required
-        >
-
-        <br><br>
-
-        <label>Teléfono:</label>
-        <input
-            type="text"
-            name="telefono"
-            value="<?= esc(old('telefono') ?? '') ?>"
-        >
-        <br><br>
-
-        <button type="submit">Guardar cliente</button>
-
-    </form>
-
-    <br>
-
-    <a href="<?= site_url('clientes') ?>">
+    <a href="<?= site_url('clientes') ?>" class="btn">
         Volver al listado
     </a>
 
-</body>
-</html>
+</div>
+
+
+<!-- ERRORES DE VALIDACIÓN -->
+
+<?php $errors = session()->getFlashdata('errors') ?? []; ?>
+
+<?php if (!empty($errors)): ?>
+
+    <div class="alert alert-error" role="alert">
+
+        <strong>Revisá los siguientes campos:</strong>
+
+        <ul>
+            <?php foreach ($errors as $error): ?>
+                <li><?= esc($error) ?></li>
+            <?php endforeach; ?>
+        </ul>
+
+    </div>
+
+<?php endif; ?>
+
+
+<!-- FORMULARIO -->
+
+<div class="panel">
+
+    <form
+        action="<?= site_url('clientes') ?>"
+        method="POST"
+    >
+
+        <?= csrf_field() ?>
+
+        <!-- NOMBRE -->
+
+        <div class="form-group">
+
+            <label for="nombre">Nombre *</label>
+
+            <input
+                type="text"
+                id="nombre"
+                name="nombre"
+                maxlength="100"
+                value="<?= esc(old('nombre') ?? '') ?>"
+                required
+            >
+
+        </div>
+
+        <!-- APELLIDO -->
+
+        <div class="form-group">
+
+            <label for="apellido">Apellido</label>
+
+            <input
+                type="text"
+                id="apellido"
+                name="apellido"
+                maxlength="100"
+                value="<?= esc(old('apellido') ?? '') ?>"
+            >
+
+        </div>
+
+        <!-- EMAIL -->
+
+        <div class="form-group">
+
+            <label for="email">Correo electrónico *</label>
+
+            <input
+                type="email"
+                id="email"
+                name="email"
+                maxlength="190"
+                value="<?= esc(old('email') ?? '') ?>"
+                required
+            >
+
+        </div>
+
+        <!-- TELÉFONO -->
+
+        <div class="form-group">
+
+            <label for="telefono">Teléfono</label>
+
+            <input
+                type="tel"
+                id="telefono"
+                name="telefono"
+                maxlength="30"
+                value="<?= esc(old('telefono') ?? '') ?>"
+            >
+
+        </div>
+
+        <!-- ACCIONES -->
+
+        <div class="action-group">
+
+            <button type="submit" class="btn btn-primary">
+                Guardar cliente
+            </button>
+
+            <a href="<?= site_url('clientes') ?>" class="btn">
+                Cancelar
+            </a>
+
+        </div>
+
+    </form>
+
+</div>
+
+<?= $this->endSection() ?>

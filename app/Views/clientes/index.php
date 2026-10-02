@@ -1,143 +1,155 @@
-<!DOCTYPE html>
-<html lang="es">
+<?= $this->extend('layouts/main') ?>
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<?= $this->section('content') ?>
 
-    <title>Listado de clientes</title>
-</head>
+    <!-- ENCABEZADO DE LA PÁGINA -->
 
-<body>
+    <div class="page-header">
 
-    <h1>Clientes registrados</h1>
+        <div>
+            <h1>Clientes registrados</h1>
 
-    <!-- MENSAJE DE ÉXITO -->
+            <p class="subtitle">
+                Administración y consulta de clientes.
+            </p>
+        </div>
+
+        <a
+            href="<?= site_url('clientes/nuevo') ?>"
+            class="btn btn-primary"
+        >
+            + Nuevo cliente
+        </a>
+
+    </div>
+
+
+    <!-- MENSAJES -->
 
     <?php $mensaje = session()->getFlashdata('success'); ?>
 
     <?php if ($mensaje): ?>
 
-        <div role="status"
-             style="padding: 12px; background: #e8f5e9;
-                    color: #1b5e20; margin-bottom: 15px;
-                    border: 1px solid #81c784;">
-
-            <strong>✅ <?= esc($mensaje) ?></strong>
-
+        <div class="alert alert-success" role="status">
+            <?= esc($mensaje) ?>
         </div>
 
     <?php endif; ?>
 
-
-    <!-- MENSAJE DE ERROR -->
 
     <?php $error = session()->getFlashdata('error'); ?>
 
     <?php if ($error): ?>
 
-        <div role="alert"
-             style="padding: 12px; background: #ffebee;
-                    color: #b71c1c; margin-bottom: 15px;
-                    border: 1px solid #ef9a9a;">
-
-            <strong>⚠ <?= esc($error) ?></strong>
-
+        <div class="alert alert-error" role="alert">
+            <?= esc($error) ?>
         </div>
 
     <?php endif; ?>
 
 
-    <!-- ENLACE PARA REGISTRAR CLIENTES -->
+    <!-- TABLA DE CLIENTES -->
 
-    <a href="<?= site_url('clientes/nuevo') ?>">
-        + Agregar nuevo cliente
-    </a>
+    <div class="panel">
 
-    <br><br>
+        <?php if (!empty($clientes)): ?>
 
+            <div class="table-wrap">
 
-    <!-- LISTADO DE CLIENTES -->
+                <table class="data-table">
 
-    <?php if (!empty($clientes)): ?>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Nombre</th>
+                            <th>Apellido</th>
+                            <th>Email</th>
+                            <th>Teléfono</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
 
-        <table border="1" cellpadding="10">
+                    <tbody>
 
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Nombre</th>
-                    <th>Apellido</th>
-                    <th>Email</th>
-                    <th>Teléfono</th>
-                    <th>Acciones</th>
-                </tr>
-            </thead>
+                        <?php foreach ($clientes as $cliente): ?>
 
-            <tbody>
+                            <tr>
 
-                <?php foreach ($clientes as $cliente): ?>
+                                <td><?= esc($cliente['id']) ?></td>
 
-                    <tr>
-                        <td><?= esc($cliente['id']) ?></td>
-                        <td><?= esc($cliente['nombre']) ?></td>
-                        <td><?= esc($cliente['apellido']) ?></td>
-                        <td><?= esc($cliente['email']) ?></td>
-                        <td><?= esc($cliente['telefono']) ?></td>
+                                <td><?= esc($cliente['nombre']) ?></td>
 
-                        <!-- ACCIONES -->
+                                <td><?= esc($cliente['apellido']) ?></td>
 
-                        <td>
+                                <td><?= esc($cliente['email']) ?></td>
 
-                            <!-- Consultar -->
+                                <td><?= esc($cliente['telefono']) ?></td>
 
-                            <a href="<?= site_url('clientes/' . $cliente['id']) ?>">
-                                Ver
-                            </a>
+                                <td>
 
-                            |
+                                    <div class="action-group">
 
-                            <!-- Editar -->
+                                        <!-- VER -->
 
-                            <a href="<?= site_url('clientes/' . $cliente['id'] . '/editar') ?>">
-                                Editar
-                            </a>
+                                        <a
+                                            class="btn"
+                                            href="<?= site_url('clientes/' . $cliente['id']) ?>"
+                                        >
+                                            Ver
+                                        </a>
 
-                            |
+                                        <!-- EDITAR -->
 
-                            <!-- Eliminar -->
+                                        <a
+                                            class="btn"
+                                            href="<?= site_url('clientes/' . $cliente['id'] . '/editar') ?>"
+                                        >
+                                            Editar
+                                        </a>
 
-                            <form
-                                action="<?= site_url('clientes/' . $cliente['id'] . '/eliminar') ?>"
-                                method="POST"
-                                style="display:inline;"
-                                onsubmit="return confirm('¿Estás seguro de eliminar este cliente?');"
-                            >
+                                        <!-- ELIMINAR -->
 
-                                <?= csrf_field() ?>
+                                        <form
+                                            action="<?= site_url('clientes/' . $cliente['id'] . '/eliminar') ?>"
+                                            method="POST"
+                                            onsubmit="return confirm('¿Estás seguro de eliminar este cliente?');"
+                                        >
 
-                                <button type="submit">
-                                    Eliminar
-                                </button>
+                                            <?= csrf_field() ?>
 
-                            </form>
+                                            <button
+                                                type="submit"
+                                                class="btn btn-danger"
+                                            >
+                                                Eliminar
+                                            </button>
 
-                        </td>
+                                        </form>
 
-                    </tr>
+                                    </div>
 
-                <?php endforeach; ?>
+                                </td>
 
-            </tbody>
+                            </tr>
 
-        </table>
+                        <?php endforeach; ?>
 
-    <?php else: ?>
+                    </tbody>
 
-        <p>No hay clientes registrados.</p>
+                </table>
 
-    <?php endif; ?>
+            </div>
 
-</body>
-</html>
+        <?php else: ?>
 
+            <div class="empty-state">
+
+                Todavía no existen clientes registrados.
+
+            </div>
+
+        <?php endif; ?>
+
+    </div>
+
+<?= $this->endSection() ?>
