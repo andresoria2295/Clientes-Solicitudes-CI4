@@ -57,3 +57,54 @@ $routes->get('api/clientes/(:num)', 'Api\Clientes::ver/$1');
 
 // Registrar un cliente mediante JSON.
 $routes->post('api/clientes', 'Api\Clientes::guardar');
+
+// Actualizar un cliente mediante JSON.
+$routes->put(
+    'api/clientes/(:num)',
+    'Api\Clientes::actualizar/$1'
+);
+
+// Eliminar un cliente mediante la API.
+$routes->delete(
+    'api/clientes/(:num)',
+    'Api\Clientes::eliminar/$1'
+);
+
+
+
+
+/* ==========================================
+   API REST - SOLICITUDES
+========================================== */
+
+// Obtener todas las solicitudes.
+$routes->get(
+    'api/solicitudes',
+    'Api\Solicitudes::index'
+);
+
+// Obtener una solicitud por ID.
+$routes->get(
+    'api/solicitudes/(:num)',
+    'Api\Solicitudes::ver/$1'
+);
+
+// Registrar una solicitud mediante JSON.
+$routes->post(
+    'api/solicitudes',
+    'Api\Solicitudes::guardar'
+);
+
+
+// Actualizar una solicitud mediante JSON.
+$routes->put(
+    'api/solicitudes/(:num)',
+    'Api\Solicitudes::actualizar/$1'
+);
+
+
+// Eliminar una solicitud mediante la API REST.
+$routes->delete(
+    'api/solicitudes/(:num)',
+    'Api\Solicitudes::eliminar/$1'
+);

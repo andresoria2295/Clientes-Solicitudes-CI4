@@ -8,12 +8,14 @@
 <div class="page-header">
 
     <div>
+
         <h1>Editar cliente</h1>
 
         <p class="subtitle">
             Modificando el cliente ID:
-            <strong><?= esc($cliente['id']) ?></strong>
+            <strong>#<?= esc($cliente->id) ?></strong>
         </p>
+
     </div>
 
     <a href="<?= site_url('clientes') ?>" class="btn">
@@ -34,9 +36,13 @@
         <strong>Revisá los siguientes errores:</strong>
 
         <ul>
+
             <?php foreach ($errors as $error): ?>
+
                 <li><?= esc($error) ?></li>
+
             <?php endforeach; ?>
+
         </ul>
 
     </div>
@@ -46,27 +52,30 @@
 
 <!-- FORMULARIO DE EDICIÓN -->
 
-<div class="panel">
+<div class="panel form-panel">
 
     <form
-        action="<?= site_url('clientes/' . $cliente['id'] . '/actualizar') ?>"
+        action="<?= site_url('clientes/' . $cliente->id . '/actualizar') ?>"
         method="POST"
     >
 
         <?= csrf_field() ?>
 
+
         <!-- NOMBRE -->
 
         <div class="form-group">
 
-            <label for="nombre">Nombre *</label>
+            <label for="nombre">
+                Nombre *
+            </label>
 
             <input
                 type="text"
                 name="nombre"
                 id="nombre"
                 maxlength="100"
-                value="<?= esc(old('nombre') ?? $cliente['nombre']) ?>"
+                value="<?= esc(old('nombre') ?? $cliente->nombre) ?>"
                 required
             >
 
@@ -77,14 +86,16 @@
 
         <div class="form-group">
 
-            <label for="apellido">Apellido</label>
+            <label for="apellido">
+                Apellido
+            </label>
 
             <input
                 type="text"
                 name="apellido"
                 id="apellido"
                 maxlength="100"
-                value="<?= esc(old('apellido') ?? $cliente['apellido'] ?? '') ?>"
+                value="<?= esc(old('apellido') ?? $cliente->apellido ?? '') ?>"
             >
 
         </div>
@@ -94,14 +105,16 @@
 
         <div class="form-group">
 
-            <label for="email">Correo electrónico *</label>
+            <label for="email">
+                Correo electrónico *
+            </label>
 
             <input
                 type="email"
                 name="email"
                 id="email"
                 maxlength="190"
-                value="<?= esc(old('email') ?? $cliente['email']) ?>"
+                value="<?= esc(old('email') ?? $cliente->email) ?>"
                 required
             >
 
@@ -112,14 +125,16 @@
 
         <div class="form-group">
 
-            <label for="telefono">Teléfono</label>
+            <label for="telefono">
+                Teléfono
+            </label>
 
             <input
-                type="tel"
+                type="text"
                 name="telefono"
                 id="telefono"
                 maxlength="30"
-                value="<?= esc(old('telefono') ?? $cliente['telefono'] ?? '') ?>"
+                value="<?= esc(old('telefono') ?? $cliente->telefono ?? '') ?>"
             >
 
         </div>
@@ -129,11 +144,17 @@
 
         <div class="action-group">
 
-            <button type="submit" class="btn btn-primary">
+            <button
+                type="submit"
+                class="btn btn-primary"
+            >
                 Guardar cambios
             </button>
 
-            <a href="<?= site_url('clientes') ?>" class="btn">
+            <a
+                href="<?= site_url('clientes') ?>"
+                class="btn"
+            >
                 Cancelar
             </a>
 
@@ -144,3 +165,4 @@
 </div>
 
 <?= $this->endSection() ?>
+

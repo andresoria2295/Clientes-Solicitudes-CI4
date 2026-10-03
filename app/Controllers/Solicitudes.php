@@ -5,6 +5,8 @@ namespace App\Controllers;
 use App\Models\SolicitudModel;
 use App\Models\ClienteModel;
 use App\Entities\Solicitud;
+use CodeIgniter\Exceptions\PageNotFoundException;
+use CodeIgniter\Database\Exceptions\DatabaseException;
 
 class Solicitudes extends BaseController
 {
@@ -87,8 +89,11 @@ class Solicitudes extends BaseController
         // 6. Instanciamos el modelo de solicitudes.
         $solicitudModel = new SolicitudModel();
 
-        // 7. Guardamos el registro.
-        $resultado = $solicitudModel->insert($datosValidados);
+        // 7. Construimos nuestra Entity con los datos validados.
+        $solicitud = new Solicitud($datosValidados);
+
+        // 8. Guardamos la Entity mediante nuestro Model.
+        $resultado = $solicitudModel->insert($solicitud);
 
         if ($resultado === false) {
 
@@ -99,7 +104,7 @@ class Solicitudes extends BaseController
                 ]);
         }
 
-        // 8. Redirigimos al listado.
+        // 9. Redirigimos al listado.
         return redirect()->to(site_url('solicitudes'))
             ->with('success', 'Solicitud registrada correctamente.');
     }
@@ -140,57 +145,74 @@ class Solicitudes extends BaseController
         ]);
     }
 
+    /*
 
-
-    // Mostrar el formulario de edición de una solicitud.
+    * Mostrar el formulario de edición utilizando una Entity.
+    */
     public function editar(int $id)
     {
-        helper('form');
-
-        // 1. Instanciamos nuestros modelos.
+        // 1. Instanciamos los Models.
         $solicitudModel = new SolicitudModel();
         $clienteModel = new ClienteModel();
 
-        // 2. Recuperamos la solicitud existente.
-        $solicitud = $solicitudModel->find($id);
+        // 2. Recuperamos la solicitud como Entity.
+        $solicitud = $solicitudModel
+            ->asObject(Solicitud::class)
+            ->find($id);
 
-        // 3. Comprobamos que exista.
-        if (!$solicitud) {
-            throw \CodeIgniter\Exceptions\PageNotFoundException::forPageNotFound(
-                'La solicitud solicitada no existe.'
+        // 3. Comprobamos si existe.
+        if ($solicitud === null) {
+            throw PageNotFoundException::forPageNotFound(
+                'La solicitud indicada no existe.'
             );
         }
 
-        // 4. Recuperamos los clientes disponibles.
+        // 4. Recuperamos los clientes para completar el SELECT.
         $clientes = $clienteModel
             ->orderBy('nombre', 'ASC')
             ->findAll();
 
-        // 5. Enviamos ambos conjuntos de datos a nuestra vista.
+        // 5. Cargamos el helper del formulario.
+        helper('form');
+
+        // 6. Enviamos los datos a nuestra vista.
         return view('solicitudes/editar', [
             'solicitud' => $solicitud,
             'clientes'  => $clientes
         ]);
     }
 
-
-    // Actualizar una solicitud existente.
+    /*
+    * Actualizar una solicitud utilizando su Entity.
+    */
     public function actualizar(int $id)
     {
-        // 1. Instanciamos el modelo.
+        // 1. Instanciamos los Models.
+
         $solicitudModel = new SolicitudModel();
+        $clienteModel = new ClienteModel();
 
-        // 2. Buscamos la solicitud que queremos modificar.
-        $solicitud = $solicitudModel->find($id);
 
-        // 3. Comprobamos que exista.
-        if (!$solicitud) {
-            throw \CodeIgniter\Exceptions\PageNotFoundException::forPageNotFound(
-                'La solicitud solicitada no existe.'
+        // 2. Recuperamos la solicitud como Entity.
+
+        $solicitud = $solicitudModel
+            ->asObject(Solicitud::class)
+            ->find($id);
+
+
+        // 3. Verificamos que exista.
+
+        if ($solicitud === null) {
+
+            throw PageNotFoundException::forPageNotFound(
+                'La solicitud indicada no existe.'
             );
+
         }
 
+
         // 4. Recuperamos los datos enviados por el formulario.
+
         $datos = $this->request->getPost([
             'cliente_id',
             'asunto',
@@ -198,7 +220,9 @@ class Solicitudes extends BaseController
             'estado'
         ]);
 
+
         // 5. Definimos las reglas de validación.
+
         $reglas = [
             'cliente_id'  => 'required|is_natural_no_zero',
             'asunto'      => 'required|max_length[150]',
@@ -206,113 +230,183 @@ class Solicitudes extends BaseController
             'estado'      => 'required|in_list[Pendiente,En proceso,Resuelta]'
         ];
 
-        // 6. Verificamos que los datos sean válidos.
-        if (!$this->validateData($datos, $reglas)) {
+
+        // 6. Validamos los datos recibidos.
+
+        if (! $this->validateData($datos, $reglas)) {
 
             return redirect()->back()
                 ->withInput()
                 ->with('errors', $this->validator->getErrors());
+
         }
 
-        // Recuperamos únicamente los campos validados.
+
+        // 7. Recuperamos únicamente los datos validados.
+
         $datosValidados = $this->validator->getValidated();
 
-        // 7. Comprobamos que el cliente seleccionado exista.
-        $clienteModel = new ClienteModel();
+
+        // 8. Convertimos el identificador del cliente a entero.
 
         $clienteId = (int) $datosValidados['cliente_id'];
 
+        $datosValidados['cliente_id'] = $clienteId;
+
+
+        // 9. Comprobamos que el cliente asociado exista.
+
         $cliente = $clienteModel->find($clienteId);
 
-        if (!$cliente) {
+        if ($cliente === null) {
 
             return redirect()->back()
                 ->withInput()
                 ->with('errors', [
                     'cliente_id' => 'El cliente seleccionado no existe.'
                 ]);
+
         }
 
-        // 8. Preparamos el identificador validado.
-        $datosValidados['cliente_id'] = $clienteId;
 
-        // 9. Actualizamos el registro existente.
+        // 10. Aplicamos los nuevos datos a nuestra Entity.
+
+        $solicitud->fill($datosValidados);
+
+
+        // 11. Comprobamos si existen modificaciones.
+
+        if (! $solicitud->hasChanged()) {
+
+            return redirect()->to(site_url('solicitudes'))
+                ->with(
+                    'success',
+                    'No se detectaron cambios en la solicitud.'
+                );
+
+        }
+
+
+        // 12. Actualizamos la Entity mediante nuestro Model.
+
         try {
 
-            $resultado = $solicitudModel->update($id, $datosValidados);
-
-        } catch (\CodeIgniter\Database\Exceptions\DatabaseException $e) {
-
-            log_message('error', 'Error al actualizar solicitud: ' . $e->getMessage());
-
-            return redirect()->back()
-                ->withInput()
-                ->with('errors', [
-                    'general' => 'No se pudo actualizar la solicitud.'
-                ]);
-        }
-
-        // 10. Comprobamos el resultado.
-        if ($resultado === false) {
-
-            return redirect()->back()
-                ->withInput()
-                ->with('errors', [
-                    'general' => 'No se pudo guardar la modificación.'
-                ]);
-        }
-
-        // 11. Volvemos al listado con un mensaje de éxito.
-        return redirect()->to(site_url('solicitudes'))
-            ->with('success', 'Solicitud actualizada correctamente.');
-    }
-
-
-    //Eliminar una solicitud existente.
-    public function eliminar(int $id)
-    {
-        // 1. Instanciamos nuestro modelo.
-        $solicitudModel = new SolicitudModel();
-
-        // 2. Buscamos la solicitud por su ID.
-        $solicitud = $solicitudModel->find($id);
-
-        // 3. Si no existe, devolvemos un error 404.
-        if (!$solicitud) {
-            throw \CodeIgniter\Exceptions\PageNotFoundException::forPageNotFound(
-                'La solicitud que intentás eliminar no existe.'
+            $resultado = $solicitudModel->update(
+                $id,
+                $solicitud
             );
-        }
 
-        // 4. Intentamos eliminar el registro.
-        try {
+        } catch (DatabaseException $e) {
 
-            $resultado = $solicitudModel->delete($id);
-
-        } catch (\CodeIgniter\Database\Exceptions\DatabaseException $e) {
-
-            // Registramos el error técnico en los logs.
             log_message(
                 'error',
-                'Error al eliminar solicitud ' . $id . ': ' . $e->getMessage()
+                'Error al actualizar la solicitud ' . $id . ': ' . $e->getMessage()
             );
 
-            // Mostramos un mensaje comprensible al usuario.
-            return redirect()->to(site_url('solicitudes'))
-                ->with('error', 'No se pudo eliminar la solicitud.');
+            return redirect()->back()
+                ->withInput()
+                ->with('errors', [
+                    'general' => 'No fue posible actualizar la solicitud. Verificá el cliente asociado.'
+                ]);
+
         }
 
-        // 5. Comprobamos el resultado.
+
+        // 13. Comprobamos el resultado del Model.
+
+        if ($resultado === false) {
+
+            return redirect()->back()
+                ->withInput()
+                ->with('errors', $solicitudModel->errors());
+
+        }
+
+
+        // 14. Regresamos al listado.
+
+        return redirect()->to(site_url('solicitudes'))
+            ->with(
+                'success',
+                'Solicitud actualizada correctamente.'
+            );
+    }
+
+
+    /*
+    * Eliminar una solicitud utilizando su Entity.
+    */
+    public function eliminar(int $id)
+    {
+        // 1. Instanciamos el Model.
+
+        $solicitudModel = new SolicitudModel();
+
+
+        // 2. Recuperamos la solicitud como Entity.
+
+        $solicitud = $solicitudModel
+            ->asObject(Solicitud::class)
+            ->find($id);
+
+
+        // 3. Verificamos que la solicitud exista.
+
+        if ($solicitud === null) {
+
+            throw PageNotFoundException::forPageNotFound(
+                'La solicitud indicada no existe.'
+            );
+
+        }
+
+
+        // 4. Intentamos eliminar el registro mediante el Model.
+
+        try {
+
+            $resultado = $solicitudModel->delete($solicitud->id);
+
+        } catch (DatabaseException $e) {
+
+            // Registramos el detalle técnico en los logs.
+
+            log_message(
+                'error',
+                'Error al eliminar la solicitud ' . $id . ': ' . $e->getMessage()
+            );
+
+            return redirect()->to(site_url('solicitudes'))
+                ->with(
+                    'error',
+                    'Ocurrió un error al eliminar la solicitud.'
+                );
+
+        }
+
+
+        // 5. Comprobamos el resultado del Model.
+
         if ($resultado === false) {
 
             return redirect()->to(site_url('solicitudes'))
-                ->with('error', 'La operación de eliminación no pudo completarse.');
+                ->with(
+                    'error',
+                    'No fue posible eliminar la solicitud.'
+                );
+
         }
 
-        // 6. Confirmamos la eliminación.
+
+        // 6. Regresamos al listado con un mensaje de éxito.
+
         return redirect()->to(site_url('solicitudes'))
-            ->with('success', 'Solicitud eliminada correctamente.');
+            ->with(
+                'success',
+                'Solicitud eliminada correctamente.'
+            );
     }
+
 
 }
 

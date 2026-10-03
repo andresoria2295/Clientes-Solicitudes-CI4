@@ -12,7 +12,7 @@
 
         <p class="subtitle">
             Modificando la solicitud ID:
-            <strong>#<?= esc($solicitud['id']) ?></strong>
+            <strong>#<?= esc($solicitud->id) ?></strong>
         </p>
     </div>
 
@@ -49,7 +49,7 @@
 <div class="panel form-panel">
 
     <form
-        action="<?= site_url('solicitudes/' . $solicitud['id'] . '/actualizar') ?>"
+        action="<?= site_url('solicitudes/' . $solicitud->id . '/actualizar') ?>"
         method="POST"
     >
 
@@ -72,7 +72,7 @@
                     <option
                         value="<?= esc($cliente['id']) ?>"
 
-                        <?= (string) (old('cliente_id') ?? $solicitud['cliente_id'])
+                        <?= (string) (old('cliente_id') ?? $solicitud->cliente_id)
                             === (string) $cliente['id']
                             ? 'selected'
                             : '' ?>
@@ -101,7 +101,7 @@
                 name="asunto"
                 id="asunto"
                 maxlength="150"
-                value="<?= esc(old('asunto') ?? $solicitud['asunto']) ?>"
+                value="<?= esc(old('asunto') ?? $solicitud->asunto) ?>"
                 required
             >
 
@@ -119,7 +119,7 @@
                 id="descripcion"
                 rows="5"
                 required
-><?= esc(old('descripcion') ?? $solicitud['descripcion']) ?></textarea>
+><?= esc(old('descripcion') ?? $solicitud->descripcion) ?></textarea>
 
         </div>
 
@@ -141,7 +141,7 @@
                     <option
                         value="<?= esc($estado) ?>"
 
-                        <?= (old('estado') ?? $solicitud['estado']) === $estado
+                        <?= (old('estado') ?? $solicitud->estado) === $estado
                             ? 'selected'
                             : '' ?>
                     >
@@ -176,4 +176,5 @@
 </div>
 
 <?= $this->endSection() ?>
+
 
