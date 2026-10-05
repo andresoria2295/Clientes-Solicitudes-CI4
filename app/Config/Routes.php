@@ -108,3 +108,13 @@ $routes->delete(
     'api/solicitudes/(:num)',
     'Api\Solicitudes::eliminar/$1'
 );
+
+
+/* ==========================================
+   API EXTERNA - CLIENTES
+========================================== */
+
+$routes->get(
+    'clientes-externos/(:num)',
+    'ClientesExternos::ver/$1'
+);

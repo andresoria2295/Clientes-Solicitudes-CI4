@@ -221,7 +221,7 @@ class Solicitudes extends BaseController
         ]);
     }
 
-    
+
     /*
     * Actualizar una solicitud mediante JSON.
     */
@@ -397,7 +397,7 @@ class Solicitudes extends BaseController
         ], 200);
     }
 
-    
+
     /*
     * Eliminar una solicitud mediante su identificador.
     */
@@ -425,6 +425,7 @@ class Solicitudes extends BaseController
 
         }
 
+        
 
         // 4. Intentamos eliminar el registro de MySQL.
 
